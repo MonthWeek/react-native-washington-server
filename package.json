@@ -1,0 +1,30 @@
+{
+  "name": "@watchman9527/react-native-washington-server",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MonthWeek/react-native-washington-server.git"
+  },
+  "homepage": "https://github.com/MonthWeek/react-native-washington-server",
+  "title": "React Native Washington Server",
+  "description": "HTTP Washington file server for React Native",
+  "main": "index.js",
+  "typings": "index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "react-native"
+  ],
+  "author": {
+    "name": "watchman9527",
+    "email": "xxx@example.com"
+  },
+  "license": "MIT",
+  "licenseFilename": "LICENSE",
+  "readmeFilename": "README.md",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  }
+}
