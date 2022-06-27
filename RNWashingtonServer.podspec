@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "RNWashingtonServer"
-  s.version      = "1.0.0"
+  s.version      = "1.0.1"
   s.summary      = "this is designed for RNWashingtonServer"
   s.description  = <<-DESC
                   this is designed for RNWashingtonServer
@@ -19,6 +19,8 @@ Pod::Spec.new do |s|
 
   s.dependency 'React'
   s.dependency 'GCDWebServer', '~> 3.0'
+  s.dependency 'GCDWebServer/WebUploader', '~> 3.0'
+  s.dependency 'GCDWebServer/WebDAV', '~> 3.0'
 
 
 end
