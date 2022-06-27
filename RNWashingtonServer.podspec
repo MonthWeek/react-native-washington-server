@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "RNWashingtonServer"
-  s.version      = "1.0.1"
+  s.version      = "1.0.2"
   s.summary      = "this is designed for RNWashingtonServer"
   s.description  = <<-DESC
                   this is designed for RNWashingtonServer
