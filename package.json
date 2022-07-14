@@ -1,6 +1,6 @@
 {
   "name": "@watchman9527/react-native-washington-server",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/MonthWeek/react-native-washington-server.git"
@@ -18,7 +18,7 @@
   ],
   "author": {
     "name": "watchman9527",
-    "email": "xxx@example.com"
+    "email": "watchman9527@example.com"
   },
   "license": "MIT",
   "licenseFilename": "LICENSE",

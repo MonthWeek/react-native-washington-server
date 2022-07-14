@@ -77,7 +77,7 @@ class StaticServer {
     this.started = true;
     this.running = true;
 
-    if (!this.keepAlive && Platform.OS === "android") {
+    if (!this.keepAlive && Platform.OS === "ios") {
       AppState.addEventListener("change", this._handleAppStateChangeFn);
     }
 
