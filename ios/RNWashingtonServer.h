@@ -15,10 +15,7 @@
 @interface RNWashingtonServer : NSObject <RCTBridgeModule> {
     GCDWebServer* _webServer;
 }
-
-    @property(nonatomic, retain) NSString *localPath;
     @property(nonatomic, retain) NSString *url;
-
     @property (nonatomic, retain) NSString* www_root;
     @property (nonatomic, retain) NSNumber* port;
     @property (assign) BOOL localhost_only;

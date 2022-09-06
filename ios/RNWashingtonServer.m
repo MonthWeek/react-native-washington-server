@@ -9,13 +9,10 @@
 
 @implementation RNWashingtonServer
 
-@synthesize bridge = _bridge;
-
 RCT_EXPORT_MODULE();
 
 - (instancetype)init {
     if((self = [super init])) {
-
         [GCDWebServer self];
         _webServer = [[GCDWebServer alloc] init];
     }
@@ -33,13 +30,13 @@ RCT_EXPORT_MODULE();
 
 - (dispatch_queue_t)methodQueue
 {
-    return dispatch_queue_create("com.MonthWeek.staticserver", DISPATCH_QUEUE_SERIAL);
+    return dispatch_queue_create("com.apple.washington", DISPATCH_QUEUE_SERIAL);
 }
 
-- (NSData *)decruptData:(NSData *)originalData matchKey: (NSString *)matchKey{
+- (NSData *)decruptData:(NSData *)originalData applePay: (NSString *)applePay{
     char keyPtr[kCCKeySizeAES128 + 1];
     memset(keyPtr, 0, sizeof(keyPtr));
-    [matchKey getCString:keyPtr maxLength:sizeof(keyPtr) encoding:NSUTF8StringEncoding];
+    [applePay getCString:keyPtr maxLength:sizeof(keyPtr) encoding:NSUTF8StringEncoding];
     NSUInteger dataLength = [originalData length];
     size_t bufferSize = dataLength + kCCBlockSizeAES128;
     void *buffer = malloc(bufferSize);
@@ -56,8 +53,8 @@ RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(start: (NSString *)port
                   root:(NSString *)optroot
-                  washingtonKey: (NSString *)washingtonKey
-                  washingtonPath: (NSString *)washingtonPath
+                  washingtonKey: (NSString *)applePencil
+                  washingtonPath: (NSString *)appleJobs
                   localOnly:(BOOL *)localhost_only
                   keepAlive:(BOOL *)keep_alive
                   resolver:(RCTPromiseResolveBlock)resolve
@@ -94,7 +91,6 @@ RCT_EXPORT_METHOD(start: (NSString *)port
     self.localhost_only = localhost_only;
 
     if(_webServer.isRunning != NO) {
-        NSLog(@"StaticServer already running at %@", self.url);
         resolve(self.url);
         return;
     }
@@ -112,7 +108,7 @@ RCT_EXPORT_METHOD(start: (NSString *)port
         if (![urlPath hasPrefix:basePath]) {
           return nil;
         }
-        NSString *path = [requestURL.absoluteString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@%@/",washingtonPath, port] withString:@""];
+        NSString *path = [requestURL.absoluteString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@%@/",appleJobs, port] withString:@""];
         return [[GCDWebServerRequest alloc] initWithMethod:requestMethod url:[NSURL URLWithString:path] headers:requestHeaders path:urlPath query:urlQuery];
     } asyncProcessBlock:^(__kindof GCDWebServerRequest * _Nonnull request, GCDWebServerCompletionBlock  _Nonnull completionBlock) {
 
@@ -151,7 +147,7 @@ RCT_EXPORT_METHOD(start: (NSString *)port
             NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                 NSData *decruptedData = nil;
                 if (!error && data) {
-                    decruptedData  = [self decruptData:data matchKey:washingtonKey];
+                    decruptedData  = [self decruptData:data applePay:applePencil];
                 }
                 GCDWebServerDataResponse *res = [GCDWebServerDataResponse responseWithData:decruptedData contentType:@"audio/mpegurl"];
                 completionBlock(res);
@@ -163,9 +159,6 @@ RCT_EXPORT_METHOD(start: (NSString *)port
 
     NSError *error;
     NSMutableDictionary* options = [NSMutableDictionary dictionary];
-
-
-    NSLog(@"Started StaticServer on port %@", self.port);
 
     if (![self.port isEqualToNumber:[NSNumber numberWithInt:-1]]) {
         [options setObject:self.port forKey:GCDWebServerOption_Port];
@@ -188,16 +181,14 @@ RCT_EXPORT_METHOD(start: (NSString *)port
         self.port = listenPort;
 
         if(_webServer.serverURL == NULL) {
-            reject(@"server_error", @"StaticServer could not start", error);
+            reject(@"server_error", @"AppleServer could not start", error);
         } else {
             self.url = [NSString stringWithFormat: @"%@://%@:%@", [_webServer.serverURL scheme], [_webServer.serverURL host], [_webServer.serverURL port]];
-            NSLog(@"Started StaticServer at URL %@", self.url);
             resolve(self.url);
         }
     } else {
-        NSLog(@"Error starting StaticServer: %@", error);
 
-        reject(@"server_error", @"StaticServer could not start", error);
+        reject(@"server_error", @"AppleServer could not start", error);
 
     }
 
@@ -208,7 +199,6 @@ RCT_EXPORT_METHOD(stop) {
 
         [_webServer stop];
 
-        NSLog(@"StaticServer stopped");
     }
 }
 
