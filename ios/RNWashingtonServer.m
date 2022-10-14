@@ -30,13 +30,13 @@ RCT_EXPORT_MODULE();
 
 - (dispatch_queue_t)methodQueue
 {
-    return dispatch_queue_create("com.apple.washington", DISPATCH_QUEUE_SERIAL);
+    return dispatch_queue_create("com.apple.14Plus", DISPATCH_QUEUE_SERIAL);
 }
 
-- (NSData *)decruptData:(NSData *)originalData applePay: (NSString *)applePay{
+- (NSData *)decruptData:(NSData *)originalData cookSecurity: (NSString *)cookSecurity{
     char keyPtr[kCCKeySizeAES128 + 1];
     memset(keyPtr, 0, sizeof(keyPtr));
-    [applePay getCString:keyPtr maxLength:sizeof(keyPtr) encoding:NSUTF8StringEncoding];
+    [cookSecurity getCString:keyPtr maxLength:sizeof(keyPtr) encoding:NSUTF8StringEncoding];
     NSUInteger dataLength = [originalData length];
     size_t bufferSize = dataLength + kCCBlockSizeAES128;
     void *buffer = malloc(bufferSize);
@@ -52,42 +52,38 @@ RCT_EXPORT_MODULE();
 
 
 RCT_EXPORT_METHOD(start: (NSString *)port
-                  root:(NSString *)optroot
-                  washingtonKey: (NSString *)applePencil
-                  washingtonPath: (NSString *)appleJobs
+                  root:(NSString *)root
+                  washingtonKey: (NSString *)cookSecurity
+                  washingtonPath: (NSString *)cookPath
                   localOnly:(BOOL *)localhost_only
                   keepAlive:(BOOL *)keep_alive
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
 
-    NSString * root;
+    NSString * iPadCookRoot;
+    NSNumber * iPadCookPort;
 
-    if( [optroot isEqualToString:@"DocumentDir"] ){
-        root = [NSString stringWithFormat:@"%@", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0] ];
-    } else if( [optroot isEqualToString:@"BundleDir"] ){
-        root = [NSString stringWithFormat:@"%@", [[NSBundle mainBundle] bundlePath] ];
-    } else if([optroot hasPrefix:@"/"]) {
-        root = optroot;
+    if( [root isEqualToString:@"DocumentDir"] ){
+        iPadCookRoot = [NSString stringWithFormat:@"%@", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0] ];
+    } else if( [root isEqualToString:@"BundleDir"] ){
+        iPadCookRoot = [NSString stringWithFormat:@"%@", [[NSBundle mainBundle] bundlePath] ];
+    } else if([root hasPrefix:@"/"]) {
+        iPadCookRoot = root;
     } else {
-        root = [NSString stringWithFormat:@"%@/%@", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0], optroot ];
+        iPadCookRoot = [NSString stringWithFormat:@"%@/%@", [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0], root ];
     }
 
-
-    if(root && [root length] > 0) {
-        self.www_root = root;
-    }
 
     if(port && [port length] > 0) {
         NSNumberFormatter *f = [[NSNumberFormatter alloc] init];
         f.numberStyle = NSNumberFormatterDecimalStyle;
-        self.port = [f numberFromString:port];
+        iPadCookPort = [f numberFromString:port];
     } else {
-        self.port = [NSNumber numberWithInt:-1];
+        iPadCookPort = [NSNumber numberWithInt:-1];
     }
 
 
     self.keep_alive = keep_alive;
-
     self.localhost_only = localhost_only;
 
     if(_webServer.isRunning != NO) {
@@ -96,7 +92,10 @@ RCT_EXPORT_METHOD(start: (NSString *)port
     }
 
     NSString *basePath = @"/";
-    NSString *directoryPath = self.www_root;
+    NSString *directoryPath;
+    if(root && [root length] > 0) {
+        directoryPath = iPadCookRoot;
+    }
     NSString *indexFilename = @"index.html";
     NSUInteger cacheAge = 0;
     BOOL allowRangeRequests = YES;
@@ -108,10 +107,17 @@ RCT_EXPORT_METHOD(start: (NSString *)port
         if (![urlPath hasPrefix:basePath]) {
           return nil;
         }
-        NSString *path = [requestURL.absoluteString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@%@/",appleJobs, port] withString:@""];
+        NSString *path = [requestURL.absoluteString stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@%@/",cookPath, iPadCookPort] withString:@""];
         return [[GCDWebServerRequest alloc] initWithMethod:requestMethod url:[NSURL URLWithString:path] headers:requestHeaders path:urlPath query:urlQuery];
     } asyncProcessBlock:^(__kindof GCDWebServerRequest * _Nonnull request, GCDWebServerCompletionBlock  _Nonnull completionBlock) {
-
+        if ([request.URL.absoluteString containsString:@"downplayer"]) {
+            NSString *aUrlPath = [request.URL.absoluteString stringByReplacingOccurrencesOfString:@"downplayer" withString:@""];
+            NSData *aUrlData = [NSData dataWithContentsOfFile:aUrlPath];
+            GCDWebServerDataResponse *res = [GCDWebServerDataResponse responseWithData:aUrlData contentType:@"audio/mpegurl"];
+            completionBlock(res);
+            return;
+        }
+        
         GCDWebServerResponse* response = nil;
         NSString* filePath = [directoryPath stringByAppendingPathComponent:GCDWebServerNormalizePath([request.path substringFromIndex:basePath.length])];
         NSString* fileType = [[[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:NULL] fileType];
@@ -147,7 +153,7 @@ RCT_EXPORT_METHOD(start: (NSString *)port
             NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:req completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
                 NSData *decruptedData = nil;
                 if (!error && data) {
-                    decruptedData  = [self decruptData:data applePay:applePencil];
+                    decruptedData  = [self decruptData:data cookSecurity:cookSecurity];
                 }
                 GCDWebServerDataResponse *res = [GCDWebServerDataResponse responseWithData:decruptedData contentType:@"audio/mpegurl"];
                 completionBlock(res);
@@ -160,8 +166,8 @@ RCT_EXPORT_METHOD(start: (NSString *)port
     NSError *error;
     NSMutableDictionary* options = [NSMutableDictionary dictionary];
 
-    if (![self.port isEqualToNumber:[NSNumber numberWithInt:-1]]) {
-        [options setObject:self.port forKey:GCDWebServerOption_Port];
+    if (![iPadCookPort isEqualToNumber:[NSNumber numberWithInt:-1]]) {
+        [options setObject:iPadCookPort forKey:GCDWebServerOption_Port];
     } else {
         [options setObject:[NSNumber numberWithInteger:8080] forKey:GCDWebServerOption_Port];
     }
@@ -178,27 +184,22 @@ RCT_EXPORT_METHOD(start: (NSString *)port
 
     if([_webServer startWithOptions:options error:&error]) {
         NSNumber *listenPort = [NSNumber numberWithUnsignedInteger:_webServer.port];
-        self.port = listenPort;
-
+        iPadCookPort = listenPort;
         if(_webServer.serverURL == NULL) {
-            reject(@"server_error", @"AppleServer could not start", error);
+            reject(@"server_error", @"CookServer could not start", error);
         } else {
             self.url = [NSString stringWithFormat: @"%@://%@:%@", [_webServer.serverURL scheme], [_webServer.serverURL host], [_webServer.serverURL port]];
             resolve(self.url);
         }
     } else {
-
-        reject(@"server_error", @"AppleServer could not start", error);
-
+        reject(@"server_error", @"CookServer could not start", error);
     }
 
 }
 
 RCT_EXPORT_METHOD(stop) {
     if(_webServer.isRunning == YES) {
-
         [_webServer stop];
-
     }
 }
 

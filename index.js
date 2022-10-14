@@ -4,7 +4,6 @@ const { RNWashingtonServer } = NativeModules;
 
 const PORT = "";
 const ROOT = null;
-const LOCALHOST = "http://localhost:";
 
 class StaticServer {
   constructor(port, root, opts) {
